@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>neXai - Gemini Style</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Marked.js untuk Render Markdown -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- Google Font Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #000000;
+            color: #e3e3e3;
+        }
+
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2a2b2e;
+            border-radius: 10px;
+        }
+
+        pre {
+            background: #18191c !important;
+            padding: 12px 16px;
+            border-radius: 12px;
+            overflow-x: auto;
+            margin: 10px 0;
+            border: 1px solid #2a2b2e;
+            font-size: 0.85rem;
+        }
+        code {
+            font-family: monospace;
+            color: #a8c7fa;
+        }
+
+        .gemini-input-box {
+            background-color: #1e1f22;
+            border-radius: 28px;
+        }
+
+        .modal-overlay {
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+        }
+
+        .action-btn {
+            color: #c4c7c5;
+            transition: all 0.2s ease;
+        }
+        .action-btn:hover {
+            color: #ffffff;
+            background-color: #28292c;
+        }
+        .action-btn.active-like {
+            color: #38bdf8 !important;
+        }
+        .action-btn.active-dislike {
+            color: #f87171 !important;
+        }
+    </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden relative">
+
+    <!-- WELCOME SCREEN FIRST TIME OPEN (Tanpa Login Google) -->
+    <div id="welcome-modal" class="fixed inset-0 z-50 modal-overlay flex flex-col justify-between p-6 max-w-md mx-auto hidden">
+        <div class="pt-8 space-y-6">
+            <h1 class="text-3xl font-bold text-white tracking-tight leading-snug">
+                Selamat datang<br>di neXai
+            </h1>
+            <p class="text-sm text-gray-300 leading-relaxed">
+                Aplikasi resmi ini gratis, menyinkronkan riwayat Anda di perangkat ini, dan menghadirkan kecerdasan model buatan neXai.
+            </p>
+
+            <div class="space-y-5 pt-4">
+                <div class="flex items-start space-x-3.5">
+                    <i class="fa-solid fa-magnifying-glass text-lg text-gray-300 mt-1"></i>
+                    <div>
+                        <h4 class="text-sm font-semibold text-gray-200">neXai bisa saja tidak akurat</h4>
+                        <p class="text-xs text-gray-400 mt-0.5">neXai bisa saja memberikan informasi yang tidak akurat tentang orang, tempat, atau fakta.</p>
+                    </div>
+                </div>
+
+                <div class="flex items-start space-x-3.5">
+                    <i class="fa-solid fa-lock text-lg text-gray-300 mt-1"></i>
+                    <div>
+                        <h4 class="text-sm font-semibold text-gray-200">Jangan bagikan info sensitif</h4>
+                        <p class="text-xs text-gray-400 mt-0.5">Obrolan dapat ditinjau dan digunakan untuk peningkatan sistem. <a href="#" onclick="showInfoModal('Privasi', 'Data tersimpan secara lokal di browser Anda.')" class="underline text-gray-300">Pelajari pilihan Anda</a>.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="space-y-3 pb-4">
+            <div class="border border-[#2d2f34] bg-[#141517] p-3 rounded-2xl text-[11px] text-gray-400 text-center leading-relaxed">
+                Dengan melanjutkan berarti Anda menyetujui <a href="#" class="underline text-gray-300">Ketentuan</a> dan telah membaca <a href="#" class="underline text-gray-300">Kebijakan Privasi</a> kami.
+            </div>
+
+            <button onclick="openAuthModal('login')" class="w-full py-3.5 bg-white text-black font-semibold rounded-full text-sm hover:bg-gray-200 transition">
+                Masuk atau daftar
+            </button>
+
+            <button onclick="continueAsGuest()" class="w-full py-2.5 text-xs text-gray-300 hover:text-white font-medium transition text-center block">
+                Lanjutkan tanpa masuk
+            </button>
+        </div>
+    </div>
+
+    <!-- AUTH MODAL (MASUK / DAFTAR AKUN) -->
+    <div id="auth-modal" class="fixed inset-0 z-50 hidden modal-overlay flex items-center justify-center p-4">
+        <div class="bg-[#1e1f22] border border-[#2d2f34] w-full max-w-sm rounded-3xl p-6 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between">
+                <h3 id="auth-modal-title" class="font-semibold text-gray-100 text-base">Masuk Akun</h3>
+                <button onclick="closeAuthModal()" class="w-8 h-8 rounded-full hover:bg-[#2a2b2e] flex items-center justify-center text-gray-400 hover:text-white">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <form onsubmit="handleAuthSubmit(event)" class="space-y-3">
+                <div id="auth-name-field">
+                    <label class="text-[11px] text-gray-400">Nama Lengkap</label>
+                    <input type="text" id="auth-name" placeholder="Contoh: PitNewbie" class="w-full mt-1 bg-[#141517] border border-[#2d2f34] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="text-[11px] text-gray-400">Email</label>
+                    <input type="email" id="auth-email" required placeholder="email@gmail.com" class="w-full mt-1 bg-[#141517] border border-[#2d2f34] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="text-[11px] text-gray-400">Kata Sandi</label>
+                    <input type="password" id="auth-password" required placeholder="••••••••" class="w-full mt-1 bg-[#141517] border border-[#2d2f34] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
+                </div>
+                
+                <button type="submit" id="auth-submit-btn" class="w-full py-3 bg-white text-black font-semibold rounded-xl text-xs hover:bg-gray-200 transition mt-2">
+                    Masuk
+                </button>
+            </form>
+
+            <div class="text-center pt-2">
+                <button onclick="toggleAuthMode()" id="auth-toggle-btn" class="text-xs text-blue-400 hover:underline">
+                    Belum punya akun? Buat akun baru
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar / Drawer -->
+    <div id="drawer-overlay" onclick="toggleDrawer()" class="modal-overlay fixed inset-0 z-40 hidden transition-opacity duration-300"></div>
+    
+    <aside id="drawer" class="fixed top-0 left-0 bottom-0 w-72 bg-[#1e1f22] z-50 transform -translate-x-full transition-transform duration-300 ease-in-out flex flex-col p-4 border-r border-[#2a2b2e]">
+        <button onclick="createNewChat()" class="w-full py-3 px-4 bg-[#28292c] hover:bg-[#333538] text-gray-200 rounded-full flex items-center space-x-3 transition font-medium text-sm mb-6 border border-[#37393e]">
+            <i class="fa-solid fa-pen-to-square text-base text-gray-300"></i>
+            <span>Percakapan Baru</span>
+        </button>
+
+        <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider px-3 mb-3">
+            Riwayat Percakapan
+        </div>
+
+        <div id="chat-list" class="flex-1 overflow-y-auto space-y-1 pr-1"></div>
+
+        <div class="border-t border-[#2a2b2e] pt-4 mt-auto text-xs text-gray-400 flex items-center justify-between px-2">
+            <span>neXai Flash v1.0</span>
+            <i class="fa-solid fa-sparkles text-amber-400"></i>
+        </div>
+    </aside>
+
+    <!-- Profile & Settings Modal -->
+    <div id="profile-modal" class="fixed inset-0 z-50 hidden modal-overlay flex items-center justify-center p-4">
+        <div class="bg-[#1e1f22] border border-[#2d2f34] w-full max-w-sm rounded-3xl p-5 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between">
+                <span id="profile-email-top" class="text-xs text-gray-400 truncate max-w-[200px]">Tamu (Tanpa Akun)</span>
+                <button onclick="toggleProfileModal()" class="w-8 h-8 rounded-full hover:bg-[#2a2b2e] flex items-center justify-center text-gray-400 hover:text-white">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div class="flex flex-col items-center text-center space-y-2 pt-1">
+                <div id="profile-avatar" class="w-20 h-20 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-2xl font-bold text-white border-2 border-amber-400 shadow-lg">
+                    TM
+                </div>
+                <h3 id="profile-name" class="font-semibold text-gray-100 text-base">Pengguna Tamu</h3>
+                <button onclick="openAuthModal('login')" id="profile-auth-btn" class="px-4 py-1.5 rounded-full border border-[#3a3b3e] bg-[#28292c] hover:bg-[#333538] text-xs font-medium text-gray-200 transition">
+                    Kelola / Masuk Akun
+                </button>
+            </div>
+
+            <!-- INDIKATOR LIMIT OBROLAN & PENYIMPANAAN -->
+            <div class="bg-[#141517] p-3.5 rounded-2xl space-y-3 border border-[#2a2b2e]">
+                <div>
+                    <div class="flex justify-between items-center text-xs mb-1">
+                        <span class="text-gray-300 font-medium">Limit Obrolan Hari Ini</span>
+                        <span id="chat-limit-text" class="text-blue-400 font-bold">0 / 30</span>
+                    </div>
+                    <div class="w-full bg-[#2a2b2e] h-2 rounded-full overflow-hidden">
+                        <div id="chat-limit-bar" class="bg-blue-500 h-full w-0 transition-all duration-300"></div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex justify-between items-center text-xs mb-1">
+                        <span class="text-gray-300 font-medium">Data Penyimpanan</span>
+                        <span id="storage-text" class="text-emerald-400 font-bold">0 KB / 1 GB</span>
+                    </div>
+                    <div class="w-full bg-[#2a2b2e] h-2 rounded-full overflow-hidden">
+                        <div id="storage-bar" class="bg-emerald-500 h-full w-0 transition-all duration-300"></div>
+                    </div>
+                    <p class="text-[10px] text-gray-500 mt-1">Kapasitas maksimal akun disimulasikan hingga 10 GB.</p>
+                </div>
+            </div>
+
+            <!-- Menu List Options -->
+            <div class="space-y-1 text-xs">
+                <button onclick="showInfoModal('Upgrade PRO', 'Fitur PRO memberikan batas obrolan unlimited dan prioritas kecepatan.')" class="w-full flex items-center space-x-3 p-3 rounded-2xl bg-[#28292c] hover:bg-[#323438] text-amber-400 font-medium transition">
+                    <i class="fa-solid fa-sparkles text-sm"></i>
+                    <span>Upgrade ke neXai PRO</span>
+                </button>
+
+                <div class="bg-[#141517] rounded-2xl overflow-hidden divide-y divide-[#242528] text-gray-300 mt-2">
+                    <div onclick="clearAppData()" class="flex items-center space-x-3 p-3 hover:bg-[#1a1b1e] cursor-pointer text-red-400">
+                        <i class="fa-solid fa-trash-can w-5"></i>
+                        <span>Hapus Semua Cache Data</span>
+                    </div>
+                    <div onclick="logoutUser()" id="logout-menu-item" class="flex items-center space-x-3 p-3 hover:bg-[#1a1b1e] cursor-pointer hidden">
+                        <i class="fa-solid fa-right-from-bracket text-gray-400 w-5"></i>
+                        <span>Keluar Akun</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Info Universal -->
+    <div id="info-modal" class="fixed inset-0 z-50 hidden modal-overlay flex items-center justify-center p-4">
+        <div class="bg-[#1e1f22] border border-[#2d2f34] w-full max-w-xs rounded-3xl p-5 shadow-2xl text-center space-y-3">
+            <h3 id="info-title" class="font-semibold text-gray-100 text-sm">Informasi</h3>
+            <p id="info-desc" class="text-xs text-gray-400 leading-relaxed"></p>
+            <button onclick="closeInfoModal()" class="w-full py-2 bg-[#2d2f34] hover:bg-[#383a3f] text-white rounded-xl text-xs font-medium transition">Tutup</button>
+        </div>
+    </div>
+
+    <!-- Modal Bagikan Chat (WhatsApp / Link) -->
+    <div id="share-modal" class="fixed inset-0 z-50 hidden modal-overlay flex items-center justify-center p-4">
+        <div class="bg-[#1e1f22] border border-[#2d2f34] w-full max-w-sm rounded-3xl p-5 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between">
+                <h3 class="font-semibold text-gray-100 text-sm">Bagikan Percakapan</h3>
+                <button onclick="closeShareModal()" class="w-8 h-8 rounded-full hover:bg-[#2a2b2e] flex items-center justify-center text-gray-400 hover:text-white">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <p class="text-xs text-gray-400">Salin tautan atau bagikan langsung jawaban AI ini:</p>
+            <div class="bg-[#141517] p-3 rounded-xl border border-[#2d2f34] flex items-center justify-between">
+                <input type="text" id="share-link-input" readonly class="bg-transparent text-xs text-gray-300 w-full focus:outline-none truncate mr-2">
+                <button onclick="copyShareLink()" class="px-3 py-1.5 bg-[#2d2f34] hover:bg-[#383a3f] text-white rounded-lg text-xs font-medium flex-shrink-0 transition">Salin</button>
+            </div>
+            <div class="grid grid-cols-2 gap-2 pt-1">
+                <button onclick="shareToWhatsApp()" class="flex items-center justify-center space-x-2 py-2.5 bg-green-600 hover:bg-green-500 text-white rounded-xl text-xs font-medium transition">
+                    <i class="fa-brands fa-whatsapp text-sm"></i>
+                    <span>WhatsApp</span>
+                </button>
+                <button onclick="closeShareModal()" class="py-2.5 bg-[#28292c] hover:bg-[#333538] text-gray-300 rounded-xl text-xs font-medium transition">Batal</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Navigation Bar -->
+    <header class="h-14 px-4 bg-black border-b border-[#18191c] flex items-center justify-between flex-shrink-0 z-30">
+        <button onclick="toggleDrawer()" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-[#1e1f22] text-gray-300 transition">
+            <i class="fa-solid fa-bars-staggered text-lg"></i>
+        </button>
+
+        <div class="flex items-center space-x-1 cursor-pointer hover:bg-[#1e1f22] px-3 py-1.5 rounded-full transition">
+            <span class="font-medium text-sm text-gray-200">neXai Flash</span>
+            <i class="fa-solid fa-chevron-down text-xs text-gray-400"></i>
+        </div>
+
+        <div class="flex items-center space-x-1">
+            <button onclick="createNewChat()" title="Percakapan Baru" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-[#1e1f22] text-gray-300 transition">
+                <i class="fa-solid fa-pen-to-square text-lg"></i>
+            </button>
+            <button onclick="toggleProfileModal()" title="Profil & Pengaturan" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-[#1e1f22] text-gray-300 transition">
+                <i class="fa-solid fa-ellipsis-vertical text-lg"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Chat Messages Container -->
+    <main id="chat-box" class="flex-1 min-h-0 overflow-y-auto py-6 px-4 md:px-0 max-w-2xl w-full mx-auto space-y-6">
+        <div id="welcome-screen" class="h-full flex flex-col items-center justify-center text-center p-6 min-h-[50vh]">
+            <div class="w-12 h-12 rounded-full bg-[#1e1f22] flex items-center justify-center mb-4">
+                <i class="fa-solid fa-sparkles text-xl text-blue-400"></i>
+            </div>
+            <h2 class="text-xl font-medium text-gray-200 mb-2">Halo! Ada yang bisa saya bantu hari ini?</h2>
+            <p class="text-xs text-gray-500 max-w-xs">Tanyakan apa saja, bantu koding, atau curhat bersama neXai.</p>
+        </div>
+    </main>
+
+    <!-- Bottom Input Container -->
+    <div class="p-3 bg-black flex-shrink-0 z-30">
+        <div class="max-w-2xl mx-auto">
+            <form id="chat-form" onsubmit="handleFormSubmit(event)" class="gemini-input-box p-2.5 flex items-end space-x-2 border border-[#2d2f34]">
+                <button type="button" onclick="pasteClipboard()" title="Tempel Salinan" class="w-10 h-10 rounded-full flex items-center justify-center text-gray-300 hover:bg-[#2a2b2e] active:scale-95 transition flex-shrink-0">
+                    <i class="fa-solid fa-plus text-xl"></i>
+                </button>
+
+                <textarea 
+                    id="user-input" 
+                    rows="1" 
+                    placeholder="Minta neXai" 
+                    class="w-full bg-transparent text-gray-100 placeholder-gray-400 focus:outline-none resize-none max-h-32 text-sm py-2 px-1"
+                    onkeydown="checkEnterSubmit(event)"
+                    oninput="autoResize(this)"></textarea>
+
+                <button type="submit" id="send-btn" class="w-10 h-10 bg-[#2d2f34] text-gray-300 hover:text-white rounded-full flex items-center justify-center transition flex-shrink-0">
+                    <i id="send-icon" class="fa-solid fa-arrow-up text-lg"></i>
+                </button>
+            </form>
+            
+            <p class="text-[11px] text-center text-gray-500 mt-2">
+                neXai adalah AI dan dapat melakukan kesalahan.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        const API_PROMPT = "kamu adalah neXai, assisten pribadi pengguna, kamu adalah ai yang cerdas, temani curhat, bantu coding, dll.";
+        const API_BASE_URL = "https://bintangapi.my.id/api/aichat/aiprompt";
+        const SESSIONS_STORAGE_KEY = "nexai_sessions_v1";
+        const USER_PROFILE_KEY = "nexai_user_profile_v1";
+        const REQUEST_COUNT_KEY = "nexai_daily_requests_v1";
+        const WELCOME_SEEN_KEY = "nexai_welcome_seen_v1";
+
+        const MAX_DAILY_CHAT = 30;
+
+        const drawer = document.getElementById('drawer');
+        const drawerOverlay = document.getElementById('drawer-overlay');
+        const profileModal = document.getElementById('profile-modal');
+        const welcomeModal = document.getElementById('welcome-modal');
+        const authModal = document.getElementById('auth-modal');
+        const infoModal = document.getElementById('info-modal');
+        const shareModal = document.getElementById('share-modal');
+        const chatBox = document.getElementById('chat-box');
+        const userInput = document.getElementById('user-input');
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const chatList = document.getElementById('chat-list');
+
+        let sessions = []; 
+        let currentSessionId = null;
+        let authMode = 'login'; 
+        let currentShareText = "";
+
+        document.addEventListener('DOMContentLoaded', () => {
+            checkFirstVisit();
+            loadUserProfile();
+            loadSessions();
+            updateUsageStats();
+        });
+
+        function checkFirstVisit() {
+            const hasVisited = localStorage.getItem(WELCOME_SEEN_KEY);
+            if (!hasVisited) {
+                welcomeModal.classList.remove('hidden');
+            }
+        }
+
+        function continueAsGuest() {
+            localStorage.setItem(WELCOME_SEEN_KEY, 'true');
+            welcomeModal.classList.add('hidden');
+        }
+
+        function openAuthModal(mode) {
+            authMode = mode;
+            welcomeModal.classList.add('hidden');
+            profileModal.classList.add('hidden');
+            authModal.classList.remove('hidden');
+            
+            const title = document.getElementById('auth-modal-title');
+            const submitBtn = document.getElementById('auth-submit-btn');
+            const toggleBtn = document.getElementById('auth-toggle-btn');
+            const nameField = document.getElementById('auth-name-field');
+
+            if (authMode === 'login') {
+                title.innerText = "Masuk Akun";
+                submitBtn.innerText = "Masuk";
+                toggleBtn.innerText = "Belum punya akun? Buat akun baru";
+                nameField.classList.add('hidden');
+            } else {
+                title.innerText = "Buat Akun Baru";
+                submitBtn.innerText = "Daftar";
+                toggleBtn.innerText = "Sudah punya akun? Masuk di sini";
+                nameField.classList.remove('hidden');
+            }
+        }
+
+        function toggleAuthMode() {
+            openAuthModal(authMode === 'login' ? 'register' : 'login');
+        }
+
+        function closeAuthModal() {
+            authModal.classList.add('hidden');
+        }
+
+        function handleAuthSubmit(e) {
+            e.preventDefault();
+            const email = document.getElementById('auth-email').value;
+            const nameInput = document.getElementById('auth-name').value;
+            
+            let name = nameInput;
+            if (authMode === 'login' && !name) {
+                name = email.split('@')[0];
+            }
+
+            const profileData = { name: name || "Pengguna", email: email };
+            localStorage.setItem(USER_PROFILE_KEY, JSON.stringify(profileData));
+            localStorage.setItem(WELCOME_SEEN_KEY, 'true');
+
+            loadUserProfile();
+            closeAuthModal();
+            showInfoModal("Sukses", authMode === 'login' ? "Berhasil masuk ke akun Anda!" : "Akun berhasil dibuat!");
+        }
+
+        function logoutUser() {
+            if (confirm("Yakin ingin keluar akun?")) {
+                localStorage.removeItem(USER_PROFILE_KEY);
+                loadUserProfile();
+                toggleProfileModal();
+                showInfoModal("Keluar", "Anda telah keluar dari akun.");
+            }
+        }
+
+        function loadUserProfile() {
+            const saved = localStorage.getItem(USER_PROFILE_KEY);
+            const logoutBtn = document.getElementById('logout-menu-item');
+            
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    document.getElementById('profile-name').innerText = data.name;
+                    document.getElementById('profile-email-top').innerText = data.email;
+                    
+                    const initials = data.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                    document.getElementById('profile-avatar').innerText = initials || 'PN';
+                    document.getElementById('profile-auth-btn').innerText = "Kelola Akun";
+                    logoutBtn.classList.remove('hidden');
+                } catch(e) {}
+            } else {
+                document.getElementById('profile-name').innerText = "Pengguna Tamu";
+                document.getElementById('profile-email-top').innerText = "Tamu (Tanpa Akun)";
+                document.getElementById('profile-avatar').innerText = "TM";
+                document.getElementById('profile-auth-btn').innerText = "Masuk / Daftar Akun";
+                logoutBtn.classList.add('hidden');
+            }
+        }
+
+        function updateUsageStats() {
+            const today = new Date().toISOString().slice(0, 10);
+            let reqData = JSON.parse(localStorage.getItem(REQUEST_COUNT_KEY) || "{}");
+            
+            if (reqData.date !== today) {
+                reqData = { date: today, count: 0 };
+                localStorage.setItem(REQUEST_COUNT_KEY, JSON.stringify(reqData));
+            }
+
+            const currentCount = reqData.count;
+            document.getElementById('chat-limit-text').innerText = `${currentCount} / ${MAX_DAILY_CHAT}`;
+            const chatPct = Math.min((currentCount / MAX_DAILY_CHAT) * 100, 100);
+            document.getElementById('chat-limit-bar').style.width = `${chatPct}%`;
+
+            let totalBytes = 0;
+            for (let key in localStorage) {
+                if (localStorage.hasOwnProperty(key)) {
+                    totalBytes += ((localStorage[key].length + key.length) * 2);
+                }
+            }
+
+            let sizeText = "";
+            if (totalBytes < 1024) {
+                sizeText = totalBytes + " B";
+            } else if (totalBytes < 1024 * 1024) {
+                sizeText = (totalBytes / 1024).toFixed(1) + " KB";
+            } else {
+                sizeText = (totalBytes / (1024 * 1024)).toFixed(2) + " MB";
+            }
+
+            document.getElementById('storage-text').innerText = `${sizeText} / 1 GB`;
+            const storagePct = Math.min((totalBytes / (1024 * 1024 * 1024)) * 100, 100);
+            document.getElementById('storage-bar').style.width = `${Math.max(storagePct, 2)}%`;
+        }
+
+        function checkAndIncrementRequestLimit() {
+            const today = new Date().toISOString().slice(0, 10);
+            let reqData = JSON.parse(localStorage.getItem(REQUEST_COUNT_KEY) || "{}");
+
+            if (reqData.date !== today) {
+                reqData = { date: today, count: 0 };
+            }
+
+            if (reqData.count >= MAX_DAILY_CHAT) {
+                showInfoModal("Batas Tercapai", "Anda telah mencapai batas 30 obrolan gratis hari ini. Silakan coba lagi besok!");
+                return false;
+            }
+
+            reqData.count++;
+            localStorage.setItem(REQUEST_COUNT_KEY, JSON.stringify(reqData));
+            updateUsageStats();
+            return true;
+        }
+
+        function clearAppData() {
+            if (confirm("Hapus semua riwayat percakapan dan cache data di perangkat ini?")) {
+                localStorage.removeItem(SESSIONS_STORAGE_KEY);
+                sessions = [];
+                createNewChat();
+                updateUsageStats();
+                toggleProfileModal();
+                showInfoModal("Berhasil", "Semua cache data penyimpanan telah dibersihkan.");
+            }
+        }
+
+        async function handleFormSubmit(event) {
+            event.preventDefault();
+            const text = userInput.value.trim();
+            if (!text) return;
+
+            if (!checkAndIncrementRequestLimit()) return;
+
+            if (welcomeScreen && !welcomeScreen.classList.contains('hidden')) {
+                welcomeScreen.classList.add('hidden');
+            }
+
+            if (!currentSessionId) {
+                const newId = Date.now().toString();
+                const newTitle = text.length > 25 ? text.substring(0, 25) + '...' : text;
+                const newSession = { id: newId, title: newTitle, messages: [] };
+                sessions.unshift(newSession);
+                currentSessionId = newId;
+            }
+
+            addMessageToCurrentSession('user', text);
+            renderMessageUI('user', text, false);
+
+            userInput.value = '';
+            userInput.style.height = 'auto';
+
+            const loadingId = appendLoading();
+            scrollToBottom();
+
+            try {
+                const session = sessions.find(s => s.id === currentSessionId);
+                let conversationHistory = "";
+                
+                if (session && session.messages.length > 0) {
+                    const recentMessages = session.messages.slice(-10); 
+                    conversationHistory = recentMessages.map(m => {
+                        return (m.sender === 'user' ? 'User: ' : 'AI: ') + m.content;
+                    }).join('\n');
+                } else {
+                    conversationHistory = "User: " + text;
+                }
+
+                const fullPrompt = `${API_PROMPT}\n\nBerikut adalah riwayat percakapan sebelumnya. Gunakan konteks ini untuk menjawab pesan terakhir:\n${conversationHistory}`;
+
+                const url = `${API_BASE_URL}?prompt=${encodeURIComponent(fullPrompt)}&text=${encodeURIComponent(text)}`;
+                const response = await fetch(url);
+                const data = await response.json();
+
+                removeMessage(loadingId);
+
+                if (data && data.data && data.data.reply) {
+                    const replyText = data.data.reply;
+                    addMessageToCurrentSession('ai', replyText);
+                    renderMessageUI('ai', replyText, true);
+                } else {
+                    const errText = 'Maaf, terjadi kesalahan dari server.';
+                    addMessageToCurrentSession('ai', errText);
+                    renderMessageUI('ai', errText, false);
+                }
+            } catch (error) {
+                removeMessage(loadingId);
+                const netErr = 'Gagal terhubung ke server API.';
+                addMessageToCurrentSession('ai', netErr);
+                renderMessageUI('ai', netErr, false);
+            }
+
+            saveSessions();
+            renderDrawerList();
+            updateUsageStats();
+        }
+
+        function toggleDrawer() {
+            const isHidden = drawer.classList.contains('-translate-x-full');
+            if (isHidden) {
+                drawer.classList.remove('-translate-x-full');
+                drawerOverlay.classList.remove('hidden');
+            } else {
+                drawer.classList.add('-translate-x-full');
+                drawerOverlay.classList.add('hidden');
+            }
+        }
+
+        function toggleProfileModal() {
+            updateUsageStats();
+            profileModal.classList.toggle('hidden');
+        }
+
+        function showInfoModal(title, desc) {
+            document.getElementById('info-title').innerText = title;
+            document.getElementById('info-desc').innerText = desc;
+            infoModal.classList.remove('hidden');
+        }
+
+        function closeInfoModal() {
+            infoModal.classList.add('hidden');
+        }
+
+        function closeShareModal() {
+            shareModal.classList.add('hidden');
+        }
+
+        async function pasteClipboard() {
+            try {
+                const text = await navigator.clipboard.readText();
+                if (text) {
+                    userInput.value += (userInput.value ? ' ' : '') + text;
+                    autoResize(userInput);
+                    userInput.focus();
+                }
+            } catch (err) {
+                alert("Gagal membaca clipboard. Berikan izin akses browser.");
+            }
+        }
+
+        function saveSessions() {
+            localStorage.setItem(SESSIONS_STORAGE_KEY, JSON.stringify(sessions));
+        }
+
+        function loadSessions() {
+            const saved = localStorage.getItem(SESSIONS_STORAGE_KEY);
+            if (saved) {
+                try {
+                    sessions = JSON.parse(saved);
+                    renderDrawerList();
+                    if (sessions.length > 0) {
+                        switchSession(sessions[0].id);
+                    }
+                } catch (e) {
+                    sessions = [];
+                }
+            }
+        }
+
+        function renderDrawerList() {
+            chatList.innerHTML = '';
+            sessions.forEach(session => {
+                const isActive = session.id === currentSessionId;
+                const item = document.createElement('div');
+                item.className = `flex items-center justify-between p-3 rounded-2xl cursor-pointer text-xs transition ${
+                    isActive ? 'bg-[#2b2d31] text-white font-medium' : 'text-gray-300 hover:bg-[#242528]'
+                }`;
+                
+                item.innerHTML = `
+                    <div onclick="switchSession('${session.id}')" class="flex items-center space-x-3 overflow-hidden flex-1">
+                        <i class="fa-regular fa-message text-gray-400"></i>
+                        <span class="truncate">${escapeHtml(session.title)}</span>
+                    </div>
+                    <button onclick="deleteSession('${session.id}', event)" title="Hapus" class="text-gray-500 hover:text-red-400 px-2 py-1">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                `;
+                chatList.appendChild(item);
+            });
+        }
+
+        function createNewChat() {
+            currentSessionId = null;
+            chatBox.innerHTML = '';
+            chatBox.appendChild(welcomeScreen);
+            welcomeScreen.classList.remove('hidden');
+            userInput.value = '';
+            userInput.style.height = 'auto';
+            renderDrawerList();
+            if (!drawer.classList.contains('-translate-x-full')) {
+                toggleDrawer();
+            }
+        }
+
+        function switchSession(sessionId) {
+            currentSessionId = sessionId;
+            const session = sessions.find(s => s.id === sessionId);
+            if (!session) return;
+
+            chatBox.innerHTML = '';
+            welcomeScreen.classList.add('hidden');
+
+            session.messages.forEach(msg => {
+                renderMessageUI(msg.sender, msg.content, false);
+            });
+
+            renderDrawerList();
+            if (!drawer.classList.contains('-translate-x-full')) {
+                toggleDrawer();
+            }
+            scrollToBottom();
+        }
+
+        function deleteSession(sessionId, event) {
+            event.stopPropagation();
+            if (confirm("Hapus percakapan ini?")) {
+                sessions = sessions.filter(s => s.id !== sessionId);
+                saveSessions();
+                updateUsageStats();
+                if (currentSessionId === sessionId) {
+                    createNewChat();
+                } else {
+                    renderDrawerList();
+                }
+            }
+        }
+
+        function addMessageToCurrentSession(sender, content) {
+            const session = sessions.find(s => s.id === currentSessionId);
+            if (session) {
+                session.messages.push({ sender, content });
+                saveSessions();
+            }
+        }
+
+        function renderMessageUI(sender, content, animate = false) {
+            const isUser = sender === 'user';
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `flex ${isUser ? 'justify-end' : 'justify-start'} w-full`;
+            const msgId = 'msg-' + Date.now() + Math.random().toString(36).substr(2, 4);
+
+            if (isUser) {
+                msgDiv.innerHTML = `
+                    <div class="bg-[#282a2d] text-gray-100 px-5 py-3 rounded-[24px] max-w-[85%] text-sm leading-relaxed font-normal">
+                        ${escapeHtml(content)}
+                    </div>
+                `;
+                chatBox.appendChild(msgDiv);
+                scrollToBottom();
+            } else {
+                msgDiv.innerHTML = `
+                    <div class="w-full space-y-3">
+                        <div id="${msgId}" class="text-gray-200 text-sm md:text-base leading-relaxed pl-1"></div>
+                        
+                        <div id="actions-${msgId}" class="flex items-center space-x-1 text-gray-400 pt-1 ${animate ? 'hidden' : ''}">
+                            <button onclick="toggleLike(this, 'like')" title="Bagus" class="action-btn w-8 h-8 rounded-full flex items-center justify-center">
+                                <i class="fa-regular fa-thumbs-up text-sm"></i>
+                            </button>
+                            <button onclick="toggleLike(this, 'dislike')" title="Kurang Bagus" class="action-btn w-8 h-8 rounded-full flex items-center justify-center">
+                                <i class="fa-regular fa-thumbs-down text-sm"></i>
+                            </button>
+                            <button onclick="retryMessage('${msgId}')" title="Coba Lagi" class="action-btn w-8 h-8 rounded-full flex items-center justify-center">
+                                <i class="fa-solid fa-rotate-right text-sm"></i>
+                            </button>
+                            <button onclick="copyToClipboard('${msgId}', this)" title="Salin" class="action-btn w-8 h-8 rounded-full flex items-center justify-center">
+                                <i class="fa-regular fa-copy text-sm"></i>
+                            </button>
+                            <button onclick="openShareModal('${msgId}')" title="Bagikan Percakapan" class="action-btn w-8 h-8 rounded-full flex items-center justify-center">
+                                <i class="fa-solid fa-ellipsis text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                chatBox.appendChild(msgDiv);
+
+                const targetEl = document.getElementById(msgId);
+                const actionEl = document.getElementById(`actions-${msgId}`);
+
+                if (animate) {
+                    let i = 0;
+                    let currentText = "";
+                    const speed = 12;
+                    function typeWriter() {
+                        if (i < content.length) {
+                            currentText += content.charAt(i);
+                            targetEl.innerHTML = marked.parse(currentText);
+                            i++;
+                            scrollToBottom();
+                            setTimeout(typeWriter, speed);
+                        } else {
+                            actionEl.classList.remove('hidden');
+                        }
+                    }
+                    typeWriter();
+                } else {
+                    targetEl.innerHTML = marked.parse(content);
+                    scrollToBottom();
+                }
+            }
+        }
+
+        function toggleLike(btn, type) {
+            const parent = btn.parentElement;
+            const likeBtn = parent.children[0];
+            const dislikeBtn = parent.children[1];
+
+            if (type === 'like') {
+                likeBtn.classList.toggle('active-like');
+                dislikeBtn.classList.remove('active-dislike');
+            } else {
+                dislikeBtn.classList.toggle('active-dislike');
+                likeBtn.classList.remove('active-like');
+            }
+        }
+
+        function openShareModal(msgId) {
+            currentShareText = document.getElementById(msgId).innerText;
+            const shareableLink = window.location.origin + window.location.pathname + "#chat=" + encodeURIComponent(currentShareText.substring(0, 50));
+            document.getElementById('share-link-input').value = shareableLink;
+            shareModal.classList.remove('hidden');
+        }
+
+        function copyShareLink() {
+            const linkInput = document.getElementById('share-link-input');
+            navigator.clipboard.writeText(linkInput.value).then(() => {
+                alert("Tautan percakapan berhasil disalin!");
+                closeShareModal();
+            });
+        }
+
+        function shareToWhatsApp() {
+            const link = document.getElementById('share-link-input').value;
+            const textToShare = "Lihat percakapan neXai AI ini:\n\n" + currentShareText + "\n\nTautan: " + link;
+            const waUrl = "https://api.whatsapp.com/send?text=" + encodeURIComponent(textToShare);
+            window.open(waUrl, '_blank');
+            closeShareModal();
+        }
+
+        function retryMessage(msgId) {
+            const lastSession = sessions.find(s => s.id === currentSessionId);
+            if (lastSession && lastSession.messages.length > 0) {
+                const lastUserMsg = [...lastSession.messages].reverse().find(m => m.sender === 'user');
+                if (lastUserMsg) {
+                    userInput.value = lastUserMsg.content;
+                    handleFormSubmit(new Event('submit'));
+                }
+            }
+        }
+
+        function appendLoading() {
+            const loadingId = 'loading-' + Date.now();
+            const msgDiv = document.createElement('div');
+            msgDiv.id = loadingId;
+            msgDiv.className = 'flex justify-start w-full';
+            msgDiv.innerHTML = `
+                <div class="flex items-center space-x-2 p-2">
+                    <i class="fa-solid fa-sparkles text-blue-400 animate-pulse text-base"></i>
+                    <span class="text-xs text-gray-400 font-medium animate-pulse">Sedang berpikir...</span>
+                </div>
+            `;
+            chatBox.appendChild(msgDiv);
+            return loadingId;
+        }
+
+        function removeMessage(id) {
+            const el = document.getElementById(id);
+            if (el) el.remove();
+        }
+
+        function autoResize(element) {
+            element.style.height = 'auto';
+            element.style.height = element.scrollHeight + 'px';
+        }
+
+        function checkEnterSubmit(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                handleFormSubmit(event);
+            }
+        }
+
+        function scrollToBottom() {
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function copyToClipboard(elementId, btnElement) {
+            const textToCopy = document.getElementById(elementId).innerText;
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                const icon = btnElement.querySelector('i');
+                icon.className = 'fa-solid fa-check text-green-400';
+                setTimeout(() => {
+                    icon.className = 'fa-regular fa-copy text-sm';
+                }, 2000);
+            });
+        }
+
+        function escapeHtml(text) {
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+    </script>
+</body>
+</html>
