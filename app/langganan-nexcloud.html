@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>neXcloud Pro - neXai</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;-webkit-tap-highlight-color:transparent}
+  body{background:#000;color:#fff;min-height:100vh;overflow-x:hidden}
+  .page{display:none;min-height:100vh;padding:20px 22px 30px;position:relative;animation:fade .3s ease}
+  .page.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+  /* === HALAMAN 1 : PAYWALL === */
+  .close{position:absolute;top:16px;right:16px;width:42px;height:42px;background:#2a2a2a;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;cursor:pointer;z-index:10}
+  .logo-wrap{text-align:center;margin-top:55px}
+  .logo{width:90px;height:90px;margin:0 auto}
+  h1{font-size:42px;line-height:1.15;text-align:center;font-weight:800;letter-spacing:-1px;margin-top:18px}
+  .subtitle{text-align:center;color:#b5b5b5;font-size:17px;line-height:1.4;margin:14px 20px 0}
+  
+  .card{border:1px solid #2b2b2b;border-radius:20px;padding:20px 18px;margin-top:28px;background:#050505}
+  .row{display:flex;align-items:center;padding:13px 0;border-bottom:1px solid #111}
+  .row:last-child{border-bottom:none}
+  .row.header{padding-top:0;padding-bottom:12px}
+  .col-fit{flex:1;font-size:16px;color:#e8e8e8;line-height:1.3}
+  .col-fit.head{color:#fff;font-size:16px}
+  .col-check{width:52px;text-align:center;font-size:20px}
+  .col-check.head{font-size:16px;color:#fff}
+  .col-check.plus{color:#3b82f6}
+  .col-check.gratis{color:#fff}
+  .dash{color:#fff;font-size:20px}
+  .blue{color:#3b82f6;font-weight:700}
+
+  .btn-white{display:block;width:100%;background:#fff;color:#000;border:none;padding:18px;border-radius:999px;font-size:18px;font-weight:700;margin-top:24px;cursor:pointer}
+  .btn-white:active{transform:scale(.98)}
+  .note{text-align:center;color:#8a8a8a;font-size:13.5px;margin-top:16px;line-height:1.4}
+  .redeem-link{text-align:center;margin-top:14px;color:#fff;font-size:16px;font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:4px}
+  .redeem-link:active{opacity:.6}
+
+  /* === HALAMAN 2 : REDEEM === */
+  .back{position:absolute;top:18px;left:16px;width:42px;height:42px;background:#1a1a1a;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer}
+  .redeem-box{margin-top:85px;text-align:center}
+  .redeem-icon{width:80px;height:80px;background:#111;border:1px solid #222;border-radius:22px;display:flex;align-items:center;justify-content:center;font-size:38px;margin:0 auto}
+  .redeem-box h2{font-size:28px;margin-top:20px;font-weight:800}
+  .redeem-box p{color:#a0a0a0;font-size:15px;line-height:1.5;margin:10px 15px 0}
+  .code-input{width:100%;background:#111;border:1px solid #2a2a2a;border-radius:14px;color:#fff;padding:17px 16px;font-size:17px;letter-spacing:2px;text-transform:uppercase;text-align:center;margin-top:28px;outline:none}
+  .code-input:focus{border-color:#3b82f6}
+  .code-input::placeholder{letter-spacing:0;text-transform:none;color:#666;font-size:15px}
+  .btn-blue{width:100%;background:#3b82f6;color:#fff;border:none;padding:17px;border-radius:999px;font-size:17px;font-weight:700;margin-top:16px;cursor:pointer}
+  .btn-blue:active{transform:scale(.98);background:#2563eb}
+  .msg{margin-top:16px;font-size:14px;min-height:20px;text-align:center;line-height:1.4}
+  .msg.ok{color:#22c55e}
+  .msg.err{color:#ef4444}
+  .hint{margin-top:24px;background:#0f0f0f;border:1px dashed #2a2a2a;border-radius:14px;padding:14px;font-size:13px;color:#888;line-height:1.5;text-align:left}
+  .hint b{color:#ccc}
+  .small{margin-top:18px;text-align:center;color:#666;font-size:12.5px}
+</style>
+</head>
+<body>
+
+<!-- ============ HALAMAN 1 ============ -->
+<div id="page1" class="page active">
+  <div class="close" onclick="closeApp()">✕</div>
+
+  <div class="logo-wrap">
+    <!-- Logo neXcloud mirip sparkle biru -->
+    <svg class="logo" viewBox="0 0 100 100" fill="none">
+      <path d="M50 5 C55 25 65 35 90 45 C65 55 55 65 50 95 C45 65 35 55 10 45 C35 35 45 25 50 5 Z" fill="#2E7CF6"/>
+      <path d="M82 2 C84 10 88 14 96 16 C88 18 84 22 82 30 C80 22 76 18 68 16 C76 14 80 10 82 2 Z" fill="#2E7CF6"/>
+    </svg>
+  </div>
+
+  <h1>Dapatkan neXcloud<br>Pro</h1>
+  <p class="subtitle">AI yang dipersonalisasi untuk keseharian dan pekerjaan</p>
+
+  <div class="card">
+    <div class="row header">
+      <div class="col-fit head">Fitur</div>
+      <div class="col-check head">Gratis</div>
+      <div class="col-check head blue">Pro</div>
+    </div>
+    <div class="row"><div class="col-fit">Model inti</div><div class="col-check gratis">✓</div><div class="col-check plus">✓</div></div>
+    <div class="row"><div class="col-fit">Model canggih dan memori</div><div class="col-check dash">—</div><div class="col-check plus">✓</div></div>
+    <div class="row"><div class="col-fit">Pembuatan gambar berkualitas lebih tinggi</div><div class="col-check dash">—</div><div class="col-check plus">✓</div></div>
+    <div class="row"><div class="col-fit">Otomatisasi tugas terjadwal</div><div class="col-check dash">—</div><div class="col-check plus">✓</div></div>
+    <div class="row"><div class="col-fit">Koneksi email dan kalender</div><div class="col-check dash">—</div><div class="col-check plus">✓</div></div>
+    <div class="row"><div class="col-fit">Penyimpanan file 20 GB</div><div class="col-check dash">—</div><div class="col-check plus">✓</div></div>
+  </div>
+
+  <button class="btn-white" onclick="upgrade()">Tingkatkan ke Pro</button>
+  <p class="note">Diperpanjang otomatis setiap bulan. Batalkan kapan saja.</p>
+  <div class="redeem-link" onclick="goRedeem()">masukkan redeem premium</div>
+</div>
+
+<!-- ============ HALAMAN 2 : REDEEM ============ -->
+<div id="page2" class="page">
+  <div class="back" onclick="goBack()">←</div>
+
+  <div class="redeem-box">
+    <div class="redeem-icon">🎁</div>
+    <h2>Redeem Premium</h2>
+    <p>Masukkan kode redeem neXcloud Pro kamu untuk mengaktifkan semua fitur Pro secara gratis.</p>
+
+    <input id="codeInput" class="code-input" placeholder="masukkan kode redeem....." maxlength="20" />
+    <button class="btn-blue" onclick="checkCode()">Aktifkan Premium</button>
+    <div id="msg" class="msg"></div>
+
+    <div class="hint">
+      <b>Belum punya kode?</b><br>
+      • Beli di admin neXcloud<br>
+      • Fitur Ini masih dalam tahap pengembangan<br>
+      • Kode hanya bisa dipakai 1x untuk 1 akun
+    </div>
+    <p class="small">neXai - neXcloud • v2.4.281</p>
+  </div>
+</div>
+
+<script>
+  function goRedeem(){
+    document.getElementById('page1').classList.remove('active');
+    document.getElementById('page2').classList.add('active');
+    window.scrollTo(0,0);
+  }
+  function goBack(){
+    document.getElementById('page2').classList.remove('active');
+    document.getElementById('page1').classList.add('active');
+    window.scrollTo(0,0);
+  }
+  function closeApp(){
+    window.location.href = "../index.html";
+  }
+  function upgrade(){
+    alert('Ini nanti nyambung ke pembayaran / atau langsung ke halaman redeem juga');
+    goRedeem();
+  }
+
+  // === LOGIKA REDEEM - EDIT DI SINI ===
+  // Ganti list kode di bawah ini sesuai kode yang lu mau
+  const VALID_CODES = [
+    "NXP12090112new",
+    "NXFr12uLth17",
+    "NXNwErA2526",
+    "StrPtDPGgh12"
+  ];
+
+  function checkCode(){
+    let input = document.getElementById('codeInput').value.trim().toUpperCase();
+    let msg = document.getElementById('msg');
+
+    if(!input){
+      msg.className = "msg err";
+      msg.innerText = "Masukkan dulu kodenya bg!";
+      return;
+    }
+
+    if(VALID_CODES.includes(input)){
+      msg.className = "msg ok";
+      msg.innerHTML = "✅ Berhasil! neXcloud Pro aktif.<br>Selamat datang di neXai Pro!";
+      setTimeout(()=>{
+        alert("Selamat! Akun kamu sekarang neXcloud PRO ✨");
+        window.location.href = "../index.html";
+    }, 500);
+
+    } else {
+      msg.className = "msg err";
+      msg.innerText = "❌ Kode salah / sudah dipakai. Cek lagi bg!";
+    }
+  }
+
+  // Biar bisa pencet Enter langsung redeem
+  document.getElementById('codeInput').addEventListener('keypress', function(e){
+    if(e.key === 'Enter') checkCode();
+  });
+</script>
+</body>
+</html>
