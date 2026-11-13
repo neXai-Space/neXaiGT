@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pelajari Pilihan Anda - neXai</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;-webkit-tap-highlight-color:transparent}
+  body{background:#fff;color:#111;min-height:100vh}
+
+  /* HEADER PUTIH */
+  .header{position:sticky;top:0;background:#fff;border-bottom:1px solid #eee;padding:14px 16px;display:flex;align-items:center;gap:12px;z-index:10}
+  .back{width:38px;height:38px;background:#f1f1f1;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;flex-shrink:0}
+  .header b{font-size:17px}
+  .header span{font-size:12px;color:#888;display:block}
+
+  /* ISI */
+  .body{padding:22px 22px 40px;max-width:700px;margin:0 auto}
+  .badge{display:inline-block;background:#eef4ff;color:#2E7CF6;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:700}
+  h2{font-size:28px;line-height:1.25;font-weight:800;margin-top:14px}
+  .updated{color:#888;font-size:13px;margin-top:8px}
+  h3{font-size:18px;margin-top:28px;margin-bottom:8px;line-height:1.4}
+  p, li{font-size:15.5px;line-height:1.7;color:#333}
+  p{margin-bottom:12px}
+  ul{padding-left:18px;margin-bottom:12px}
+  li{margin-bottom:8px}
+
+  .warn{background:#FFF7ED;border:1px solid #FDBA74;border-radius:14px;padding:14px;margin:16px 0}
+  .warn b{color:#C2410C}
+  .danger{background:#FEF2F2;border:1px solid #FCA5A5;border-radius:14px;padding:14px;margin:16px 0}
+  .danger b{color:#B91C1C}
+  .good{background:#F0FDF4;border:1px solid #86EFAC;border-radius:14px;padding:14px;margin:16px 0}
+  .good b{color:#15803D}
+
+  .table{width:100%;border-collapse:collapse;margin:12px 0;font-size:14px}
+  .table th{background:#f5f5f5;text-align:left;padding:10px;border:1px solid #eee}
+  .table td{padding:10px;border:1px solid #eee;vertical-align:top;line-height:1.5}
+
+  .btn-dark{width:100%;background:#000;color:#fff;border:none;padding:16px;border-radius:999px;font-size:16px;font-weight:700;margin-top:24px;cursor:pointer}
+  .btn-dark:active{transform:scale(.98)}
+  .footer{margin-top:28px;padding-top:16px;border-top:1px solid #eee;color:#888;font-size:12.5px;line-height:1.6;text-align:center}
+  .footer a{color:#111;text-decoration:underline}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="back" onclick="window.location.href='../index.html'">←</div>
+  <div><b>Pelajari pilihan Anda</b><span>Privasi • Data • Hukum - neXcloud</span></div>
+</div>
+
+<div class="body">
+  <span class="badge">neXcloud • neXai - RESMI</span>
+  <h2>Pelajari pilihan Anda sebelum menggunakan neXai</h2>
+  <p class="updated">Terakhir diperbarui: 13 November 2026 • Berlaku untuk semua pengguna di Indonesia</p>
+
+  <p>Halaman ini menjelaskan dengan bahasa yang mudah dipahami: <b>data apa yang kami kumpulkan, untuk apa data itu dipakai, apa yang boleh dan tidak boleh Anda lakukan, dan apa konsekuensi hukumnya</b> jika Anda melanggar. Harap baca sampai habis.</p>
+
+  <div class="warn">
+    <b>⚠️ INTI PENTING: Jangan kirim data sensitif.</b><br>
+    Jangan pernah mengirim password, PIN, OTP, nomor KTP / KK, nomor rekening, foto KTP, foto wajah + KTP, lokasi rumah secara detail, atau rahasia perusahaan / sekolah ke neXai. Sekali terkirim, data itu sulit ditarik kembali.
+  </div>
+
+  <h3>1. Apa itu neXai?</h3>
+  <p>neXai adalah aplikasi kecerdasan buatan buatan <b>neXcloud</b>. Anda bisa bertanya, meminta dibuatkan teks, kode, gambar, ide, dan bantuan belajar / pekerjaan. neXai bekerja dengan model AI yang memprediksi jawaban berdasarkan pola, bukan manusia yang mengetahui kebenaran mutlak.</p>
+  <p>Karena itu, jawaban neXai <b>bisa salah, bisa kadaluarsa, dan bisa mengarang (halusinasi)</b>. Jangan jadikan jawaban neXai sebagai satu-satunya dasar untuk keputusan penting seperti kesehatan, hukum, keuangan, atau keselamatan.</p>
+
+  <h3>2. Data apa yang kami kumpulkan?</h3>
+  <p>Saat Anda menggunakan neXai, kami dapat mengumpulkan:</p>
+  <ul>
+    <li><b>Isi obrolan:</b> Pertanyaan, teks, gambar, dan file yang Anda kirim.</li>
+    <li><b>Data akun:</b> Nama, email, nomor HP, foto profil jika Anda daftar.</li>
+    <li><b>Data perangkat:</b> Jenis HP, versi aplikasi, bahasa, zona waktu.</li>
+    <li><b>Data penggunaan:</b> Fitur yang Anda klik, durasi, error / crash log.</li>
+    <li><b>Lokasi kasar:</b> Kota / provinsi dari IP, BUKAN lokasi GPS detail, kecuali Anda sendiri yang membagikannya.</li>
+  </ul>
+
+  <h3>3. Data Anda dipakai untuk apa?</h3>
+  <table class="table">
+    <tr><th>Tujuan</th><th>Penjelasan</th></tr>
+    <tr><td>Menjawab chat</td><td>Agar neXai bisa membalas pertanyaan Anda.</td></tr>
+    <tr><td>Meningkatkan sistem</td><td>Obrolan yang dianonimkan dapat ditinjau manusia / mesin untuk melatih model agar lebih aman dan akurat.</td></tr>
+    <tr><td>Keamanan</td><td>Mendeteksi spam, penipuan, peretasan, dan penyalahgunaan.</td></tr>
+    <tr><td>Personalisasi</td><td>Mengingat preferensi Anda jika Anda mengaktifkan memori.</td></tr>
+  </table>
+
+  <div class="good">
+    <b>✅ Pilihan Anda - Anda yang pegang kendali:</b><br>
+    1. Anda bisa <b>menghapus riwayat chat</b> kapan saja di menu Pengaturan &gt; Hapus Riwayat.<br>
+    2. Anda bisa <b>mematikan Memori</b> agar neXai tidak mengingat info pribadi Anda.<br>
+    3. Anda bisa <b>menggunakan Mode Tamu</b> (Lanjutkan tanpa masuk) agar tidak tersimpan ke akun.<br>
+    4. Anda bisa meminta <b>hapus akun & data</b> dengan menghubungi admin neXcloud.
+  </div>
+
+  <h3>4. Apa yang DILARANG di neXai?</h3>
+  <p>Menggunakan neXai untuk hal berikut adalah <b>pelanggaran Ketentuan</b> dan dapat menyebabkan akun diblokir permanen tanpa pengembalian dana:</p>
+  <ul>
+    <li>Membuat konten pornografi anak, kekerasan seksual, atau pelecehan.</li>
+    <li>Membuat / menyebarkan hoaks, ujaran kebencian, SARA, dan fitnah terhadap orang tertentu.</li>
+    <li>Menipu, phishing, membuat malware, virus, script hack, atau cara membobol sistem orang lain.</li>
+    <li>Membuat dokumen palsu: KTP, ijazah, surat dokter, kwitansi, sertifikat, uang, dll.</li>
+    <li>Mengunggah / meminta data pribadi orang lain tanpa izin (doxing): alamat rumah, nomor HP, NIK, password orang lain.</li>
+    <li>Melanggar hak cipta: menyuruh AI menjiplak 100% buku, lagu, film, atau karya orang lain.</li>
+  </ul>
+
+  <h3>5. Konsekuensi Hukum - BACA INI BAIK-BAIK</h3>
+  <p>neXai adalah alat. <b>Anda yang bertanggung jawab penuh atas apa yang Anda kirim dan apa yang Anda lakukan dengan jawaban dari neXai.</b> neXcloud tidak bertanggung jawab jika Anda menggunakan jawaban AI untuk melanggar hukum.</p>
+
+  <div class="danger">
+    <b>🚨 KONSEKUENSI HUKUM DI INDONESIA:</b><br><br>
+    <b>1. UU ITE (UU No. 1 Tahun 2024 - Perubahan UU ITE):</b><br>
+    Menyebarkan hoaks, pencemaran nama baik, ujaran kebencian, dan ancaman melalui elektronik dapat dipidana penjara dan/atau denda.<br><br>
+    <b>2. UU Pelindungan Data Pribadi (UU No. 27 Tahun 2022):</b><br>
+    Mengumpulkan, menyebarkan, atau menjual data pribadi orang lain (NIK, foto KTP, alamat, nomor HP) tanpa izin dapat dipidana hingga <b>5 tahun penjara dan denda hingga Rp 5 Miliar</b>.<br><br>
+    <b>3. KUHP & UU Hak Cipta:</b><br>
+    Pemalsuan dokumen, penipuan, dan pembajakan karya cipta dapat dipidana penjara dan denda.<br><br>
+    <b>4. Jika Anda masih di bawah 18 tahun:</b><br>
+    Anda harus menggunakan neXai dengan izin orang tua / wali. Orang tua / wali bertanggung jawab atas penggunaan akun anak.
+  </div>
+
+  <p>Contoh nyata yang dilarang: Anda menyuruh neXai membuatkan surat izin dokter palsu untuk bolos sekolah, lalu Anda pakai surat itu. Itu adalah <b>pemalsuan dokumen</b>. neXai tidak akan bertanggung jawab, Anda yang menanggung risikonya.</p>
+
+  <h3>6. Tentang Fitur Premium & Redeem Code</h3>
+  <p>Fitur <b>neXcloud Pro</b> adalah layanan berbayar. Jika Anda membeli atau menukarkan kode redeem dari pihak tidak resmi / hasil curian / hasil hack, kode tersebut dapat dibatalkan dan akun Anda dapat diblokir. Belilah kode redeem hanya dari admin resmi neXcloud.</p>
+  <p>Kode redeem yang sudah dipakai tidak dapat dikembalikan atau diuangkan.</p>
+
+  <h3>7. Berapa lama data disimpan?</h3>
+  <ul>
+    <li>Riwayat chat tersimpan selama akun Anda aktif, atau sampai Anda menghapusnya.</li>
+    <li>Data yang sudah Anda hapus akan dihapus dari server kami maksimal dalam 30 hari, kecuali jika wajib disimpan untuk keperluan hukum / keamanan.</li>
+    <li>Jika Anda menghapus akun, seluruh data pribadi Anda akan dihapus secara permanen dan tidak dapat dikembalikan.</li>
+  </ul>
+
+  <h3>8. Keamanan Anda</h3>
+  <ul>
+    <li>Jangan bagikan kode OTP / password neXai Anda ke siapapun, termasuk yang mengaku admin neXcloud. Admin asli TIDAK PERNAH meminta OTP.</li>
+    <li>Gunakan password yang kuat dan berbeda dengan password game / sosmed Anda.</li>
+    <li>Jika akun Anda diretas, segera hubungi admin dan ganti password.</li>
+  </ul>
+
+  <h3>9. Perubahan Ketentuan</h3>
+  <p>Kami dapat memperbarui halaman ini sewaktu-waktu. Jika ada perubahan besar, kami akan memberi tahu Anda lewat aplikasi. Dengan terus menggunakan neXai setelah perubahan, berarti Anda menyetujui ketentuan yang baru.</p>
+
+  <div class="good">
+    <b>✅ Jadi, intinya:</b><br>
+    Gunakan neXai untuk belajar, bekerja, dan berkarya. Jangan kirim data sensitif, jangan menipu, jangan menyebarkan kebencian, dan selalu cek ulang jawaban penting. Anda aman jika Anda menggunakan neXai dengan bijak.
+  </div>
+
+  <button class="btn-dark" onclick="window.location.href='../indexv2.html'">Saya Mengerti, Kembali</button>
+
+  <div class="footer">
+    neXcloud - neXai • PT neXcloud Indonesia (Proyek Pelajar)<br>
+    Hubungi admin: <a href="#">@neXcloud (TikTok / IG)</a> • Email: admin@nexcloud.id<br>
+    Dengan melanjutkan, Anda menyetujui Ketentuan & Kebijakan Privasi ini.
+  </div>
+</div>
+
+</body>
+</html>
