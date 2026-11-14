@@ -312,30 +312,6 @@
         </div>
     </div>
 
-    <!-- Modal Bagikan Chat -->
-    <div id="share-modal" class="fixed inset-0 z-50 hidden modal-overlay flex items-center justify-center p-4">
-        <div class="bg-[#1e1f22] border border-[#2d2f34] w-full max-w-sm rounded-3xl p-5 shadow-2xl space-y-4">
-            <div class="flex items-center justify-between">
-                <h3 class="font-semibold text-gray-100 text-sm">Bagikan Percakapan</h3>
-                <button onclick="closeShareModal()" class="w-8 h-8 rounded-full hover:bg-[#2a2b2e] flex items-center justify-center text-gray-400 hover:text-white">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
-            </div>
-            <p class="text-xs text-gray-400">Salin tautan atau bagikan langsung jawaban AI ini:</p>
-            <div class="bg-[#141517] p-3 rounded-xl border border-[#2d2f34] flex items-center justify-between">
-                <input type="text" id="share-link-input" readonly class="bg-transparent text-xs text-gray-300 w-full focus:outline-none truncate mr-2">
-                <button onclick="copyShareLink()" class="px-3 py-1.5 bg-[#2d2f34] hover:bg-[#383a3f] text-white rounded-lg text-xs font-medium flex-shrink-0 transition">Salin</button>
-            </div>
-            <div class="grid grid-cols-2 gap-2 pt-1">
-                <button onclick="shareToWhatsApp()" class="flex items-center justify-center space-x-2 py-2.5 bg-green-600 hover:bg-green-500 text-white rounded-xl text-xs font-medium transition">
-                    <i class="fa-brands fa-whatsapp text-sm"></i>
-                    <span>WhatsApp</span>
-                </button>
-                <button onclick="closeShareModal()" class="py-2.5 bg-[#28292c] hover:bg-[#333538] text-gray-300 rounded-xl text-xs font-medium transition">Batal</button>
-            </div>
-        </div>
-    </div>
-
     <!-- Top Navigation Bar -->
     <header class="h-14 px-4 bg-black border-b border-[#18191c] flex items-center justify-between flex-shrink-0 z-30">
         <button onclick="toggleDrawer()" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-[#1e1f22] text-gray-300 transition">
@@ -391,7 +367,7 @@
 
                     <textarea 
                         id="user-input" 
-                        rows="1" 
+                      rows="1" 
                         placeholder="Minta neXai" 
                         class="w-full bg-transparent text-gray-100 placeholder-gray-400 focus:outline-none resize-none max-h-32 text-sm py-2 px-1"
                         onkeydown="checkEnterSubmit(event)"
@@ -566,7 +542,6 @@
         const authModal = document.getElementById('auth-modal');
         const infoModal = document.getElementById('info-modal');
         const modelModal = document.getElementById('model-modal');
-        const shareModal = document.getElementById('share-modal');
         const chatBox = document.getElementById('chat-box');
         const userInput = document.getElementById('user-input');
         const welcomeScreen = document.getElementById('welcome-screen');
@@ -575,7 +550,6 @@
         let sessions = []; 
         let currentSessionId = null;
         let authMode = 'login'; 
-        let currentShareText = "";
         let currentModel = localStorage.getItem(SELECTED_MODEL_KEY) || 'nexai-flash';
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -1014,9 +988,6 @@
             closeConfirmModal();
         });
 
-        function closeShareModal() {
-            shareModal.classList.add('hidden');
-        }
 
         async function pasteClipboard() {
             try {
@@ -1158,9 +1129,6 @@
                             <button onclick="copyToClipboard('${msgId}', this)" title="Salin" class="action-btn w-8 h-8 rounded-full flex items-center justify-center">
                                 <i class="fa-regular fa-copy text-sm"></i>
                             </button>
-                            <button onclick="openShareModal('${msgId}')" title="Bagikan Percakapan" class="action-btn w-8 h-8 rounded-full flex items-center justify-center">
-                                <i class="fa-solid fa-ellipsis text-sm"></i>
-                            </button>
                         </div>
                     </div>
                 `;
@@ -1210,29 +1178,6 @@
                 dislikeBtn.classList.toggle('active-dislike');
                 likeBtn.classList.remove('active-like');
             }
-        }
-
-        function openShareModal(msgId) {
-            currentShareText = document.getElementById(msgId).innerText;
-            const shareableLink = window.location.origin + window.location.pathname + "#chat=" + encodeURIComponent(currentShareText.substring(0, 50));
-            document.getElementById('share-link-input').value = shareableLink;
-            shareModal.classList.remove('hidden');
-        }
-
-        function copyShareLink() {
-            const linkInput = document.getElementById('share-link-input');
-            navigator.clipboard.writeText(linkInput.value).then(() => {
-                alert("Tautan percakapan berhasil disalin!");
-                closeShareModal();
-            });
-        }
-
-        function shareToWhatsApp() {
-            const link = document.getElementById('share-link-input').value;
-            const textToShare = "Lihat percakapan neXai AI ini:\n\n" + currentShareText + "\n\nTautan: " + link;
-            const waUrl = "https://api.whatsapp.com/send?text=" + encodeURIComponent(textToShare);
-            window.open(waUrl, '_blank');
-            closeShareModal();
         }
 
         function retryMessage(msgId) {
