@@ -73,6 +73,24 @@
         .action-btn.active-dislike {
             color: #f87171 !important;
         }
+        #chat-box img {
+            border-radius: 18px;
+            max-width: 100%;
+            margin-top: 8px;
+            border: 1px solid #2d2f34;
+        }
+        #chat-box img {
+            border-radius: 18px;
+            max-width: 100%;
+            margin-top: 8px;
+            border: 1px solid #2d2f34;
+            cursor: pointer;
+            transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+        #chat-box img:hover {
+            opacity: 0.92;
+        }
+
     </style>
 </head>
 <body class="h-screen flex flex-col overflow-hidden relative">
@@ -351,25 +369,38 @@
         </div>
     </main>
 
-    <!-- Bottom Input Container -->
+        <!-- Bottom Input Container -->
     <div class="p-3 bg-black flex-shrink-0 z-30">
         <div class="max-w-2xl mx-auto">
-            <form id="chat-form" onsubmit="handleFormSubmit(event)" class="gemini-input-box p-2.5 flex items-end space-x-2 border border-[#2d2f34]">
-                <button type="button" onclick="pasteClipboard()" title="Tempel Salinan" class="w-10 h-10 rounded-full flex items-center justify-center text-gray-300 hover:bg-[#2a2b2e] active:scale-95 transition flex-shrink-0">
-                    <i class="fa-solid fa-plus text-xl"></i>
-                </button>
+            <form id="chat-form" onsubmit="handleFormSubmit(event)" class="gemini-input-box p-2.5 flex flex-col border border-[#2d2f34]">
+                <!-- Badge indikator saat mode tool AI aktif -->
+                <div id="active-tool-badge" class="hidden px-2 pb-2 flex items-center justify-between">
+                    <span id="active-tool-label" class="inline-flex items-center space-x-1.5 bg-[#282a2d] text-blue-400 text-xs font-medium px-3 py-1 rounded-full border border-blue-500/30">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        <span>Buat gambar</span>
+                    </span>
+                    <button type="button" onclick="resetToolMode()" class="text-xs text-gray-400 hover:text-white px-2">
+                        <i class="fa-solid fa-xmark"></i> Batal
+                    </button>
+                </div>
 
-                <textarea 
-                    id="user-input" 
-                    rows="1" 
-                    placeholder="Minta neXai" 
-                    class="w-full bg-transparent text-gray-100 placeholder-gray-400 focus:outline-none resize-none max-h-32 text-sm py-2 px-1"
-                    onkeydown="checkEnterSubmit(event)"
-                    oninput="autoResize(this)"></textarea>
+                <div class="flex items-end space-x-2 w-full">
+                    <button type="button" onclick="toggleToolsModal()" title="Tools AI" class="w-10 h-10 rounded-full flex items-center justify-center text-gray-300 hover:bg-[#2a2b2e] active:scale-95 transition flex-shrink-0">
+                        <i class="fa-solid fa-plus text-xl"></i>
+                    </button>
 
-                <button type="submit" id="send-btn" class="w-10 h-10 bg-[#2d2f34] text-gray-300 hover:text-white rounded-full flex items-center justify-center transition flex-shrink-0">
-                    <i id="send-icon" class="fa-solid fa-arrow-up text-lg"></i>
-                </button>
+                    <textarea 
+                        id="user-input" 
+                        rows="1" 
+                        placeholder="Minta neXai" 
+                        class="w-full bg-transparent text-gray-100 placeholder-gray-400 focus:outline-none resize-none max-h-32 text-sm py-2 px-1"
+                        onkeydown="checkEnterSubmit(event)"
+                        oninput="autoResize(this)"></textarea>
+
+                    <button type="submit" id="send-btn" class="w-10 h-10 bg-[#2d2f34] text-gray-300 hover:text-white rounded-full flex items-center justify-center transition flex-shrink-0">
+                        <i id="send-icon" class="fa-solid fa-arrow-up text-lg"></i>
+                    </button>
+                </div>
             </form>
             
             <p class="text-[11px] text-center text-gray-500 mt-2">
@@ -378,10 +409,94 @@
         </div>
     </div>
 
+    <!-- Bottom Sheet Menu Tools AI -->
+    <div id="tools-modal" onclick="if(event.target === this) toggleToolsModal()" class="fixed inset-0 z-50 hidden modal-overlay flex items-end justify-center">
+        <div class="bg-[#1e1f22] border-t border-[#2d2f34] w-full max-w-2xl rounded-t-3xl p-5 pb-8 shadow-2xl space-y-5">
+            <!-- Garis Handle Atas -->
+            <div class="w-10 h-1 bg-gray-500/60 rounded-full mx-auto"></div>
+
+            <!-- Baris Atas: Foto, Kamera, File -->
+            <div class="grid grid-cols-3 gap-3">
+                <button type="button" onclick="handleAttachmentClick('Foto')" class="bg-[#28292c] hover:bg-[#333538] active:scale-95 transition rounded-2xl py-4 flex flex-col items-center justify-center space-y-2 text-gray-200">
+                    <i class="fa-regular fa-image text-xl"></i>
+                    <span class="text-xs font-medium">Foto</span>
+                </button>
+                <button type="button" onclick="handleAttachmentClick('Kamera')" class="bg-[#28292c] hover:bg-[#333538] active:scale-95 transition rounded-2xl py-4 flex flex-col items-center justify-center space-y-2 text-gray-200">
+                    <i class="fa-solid fa-camera text-xl"></i>
+                    <span class="text-xs font-medium">Kamera</span>
+                </button>
+                <button type="button" onclick="handleAttachmentClick('File')" class="bg-[#28292c] hover:bg-[#333538] active:scale-95 transition rounded-2xl py-4 flex flex-col items-center justify-center space-y-2 text-gray-200">
+                    <i class="fa-solid fa-paperclip text-xl"></i>
+                    <span class="text-xs font-medium">File</span>
+                </button>
+            </div>
+
+            <!-- Daftar Tools AI -->
+            <div class="space-y-1 pt-1">
+                <button type="button" onclick="activateToolMode('image')" class="w-full flex items-center space-x-4 p-3 rounded-2xl hover:bg-[#28292c] active:scale-[0.99] transition text-left">
+                    <div class="w-9 h-9 rounded-xl bg-[#28292c] flex items-center justify-center text-gray-200 flex-shrink-0">
+                        <i class="fa-solid fa-wand-magic-sparkles text-base"></i>
+                    </div>
+                    <div>
+                        <div class="text-sm font-medium text-gray-100">Buat gambar</div>
+                        <div class="text-xs text-gray-400">Visualisasikan dan edit</div>
+                    </div>
+                </button>
+
+                <button type="button" onclick="activateToolMode('canvas')" class="w-full flex items-center space-x-4 p-3 rounded-2xl hover:bg-[#28292c] active:scale-[0.99] transition text-left">
+                    <div class="w-9 h-9 rounded-xl bg-[#28292c] flex items-center justify-center text-gray-200 flex-shrink-0">
+                        <i class="fa-solid fa-file-code text-base"></i>
+                    </div>
+                    <div>
+                        <div class="text-sm font-medium text-gray-100">Canvas</div>
+                        <div class="text-xs text-gray-400">Buat kode, tulis, atau buat slide</div>
+                    </div>
+                </button>
+
+                <button type="button" onclick="activateToolMode('guide')" class="w-full flex items-center space-x-4 p-3 rounded-2xl hover:bg-[#28292c] active:scale-[0.99] transition text-left">
+                    <div class="w-9 h-9 rounded-xl bg-[#28292c] flex items-center justify-center text-gray-200 flex-shrink-0">
+                        <i class="fa-solid fa-book-open text-base"></i>
+                    </div>
+                    <div>
+                        <div class="text-sm font-medium text-gray-100">Pembelajaran terpandu</div>
+                        <div class="text-xs text-gray-400">Dapatkan bantuan langkah demi langkah</div>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Preview Gambar Fullscreen -->
+    <div id="image-preview-modal" onclick="if(event.target === this) closeImagePreview()" class="fixed inset-0 z-[70] hidden bg-black/95 backdrop-blur-md flex flex-col justify-between p-4">
+        <!-- Header Preview -->
+        <div class="flex items-center justify-between pt-2 px-1">
+            <span id="preview-image-title" class="text-xs text-gray-300 truncate max-w-[75%]">Pratinjau Gambar</span>
+            <button type="button" onclick="closeImagePreview()" class="w-10 h-10 rounded-full bg-[#1e1f22] hover:bg-[#2d2f34] flex items-center justify-center text-gray-200 transition">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+
+        <!-- Gambar Utama -->
+        <div class="flex-1 flex items-center justify-center overflow-hidden my-4" onclick="if(event.target === this) closeImagePreview()">
+            <img id="preview-image-el" src="" alt="Preview" class="max-h-[75vh] max-w-full object-contain rounded-2xl shadow-2xl border border-[#2d2f34]">
+        </div>
+
+        <!-- Tombol Unduh di Bawah -->
+        <div class="pb-4 flex justify-center">
+            <button type="button" id="preview-download-btn" class="px-6 py-3 bg-white hover:bg-gray-200 active:scale-95 text-black font-semibold rounded-full text-xs flex items-center space-x-2 shadow-lg transition">
+                <i class="fa-solid fa-download"></i>
+                <span>Unduh Gambar</span>
+            </button>
+        </div>
+    </div>
+
+
     <script>
         const API_PROMPT = "kamu adalah neXai, assisten pribadi pengguna, kamu adalah ai yang cerdas, temani curhat, bantu coding, dll.";
         const API_NEXAI_URL = "https://bintangapi.my.id/api/aichat/aiprompt";
         const API_LLAMA_URL = "https://bintangapi.my.id/api/aichat/llama-4";
+        const API_IMAGE_URL = "https://bintangapi.my.id/api/aiimg/zimage";
+        let activeTool = null;
 
         const SESSIONS_STORAGE_KEY = "nexai_sessions_v1";
         const USER_PROFILE_KEY = "nexai_user_profile_v1";
@@ -618,7 +733,7 @@
             }, "Hapus");
         }
         
-                async function handleFormSubmit(event) {
+        async function handleFormSubmit(event) {
             event.preventDefault();
             const text = userInput.value.trim();
             if (!text) return;
@@ -637,68 +752,116 @@
                 currentSessionId = newId;
             }
 
+            const selectedTool = activeTool;
             addMessageToCurrentSession('user', text);
             renderMessageUI('user', text, false);
 
             userInput.value = '';
             userInput.style.height = 'auto';
+            resetToolMode();
 
             const loadingId = appendLoading();
             scrollToBottom();
 
             try {
-                const session = sessions.find(s => s.id === currentSessionId);
-                let conversationHistory = "";
-                
-                if (session && session.messages.length > 0) {
-                    const recentMessages = session.messages.slice(-10); 
-                    conversationHistory = recentMessages.map(m => {
-                        return (m.sender === 'user' ? 'User: ' : 'AI: ') + m.content;
-                    }).join('\n');
+                // JIKA MODE BUAT GAMBAR AKTIF -> PAKAI API ZIMAGE
+                if (selectedTool === 'image') {
+                    const imgApiUrl = `${API_IMAGE_URL}?prompt=${encodeURIComponent(text)}`;
+
+                if (window.AndroidHost && window.AndroidHost.generateImageBackground) {
+                        window.AndroidHost.generateImageBackground(text, imgApiUrl, loadingId);
+                        return; // Hasil & notifikasi ditangani oleh onNativeImageReady
+                    }
+
+                    const res = await fetch(imgApiUrl);
+
+                    if (!res.ok) {
+                        removeMessage(loadingId);
+                        const errText = 'Maaf, gagal membuat gambar dari server.';
+                        addMessageToCurrentSession('ai', errText);
+                        renderMessageUI('ai', errText, false);
+                    } else {
+                        const contentType = res.headers.get("content-type") || "";
+                        let finalImgSrc = "";
+
+                        if (contentType.includes("application/json")) {
+                            const jsonData = await res.json();
+                            finalImgSrc = jsonData.url || jsonData.result || jsonData.image || (jsonData.data && jsonData.data.url) || imgApiUrl;
+                        } else {
+                            // Kunci gambar menjadi Data URL agar tidak generate ulang saat diunduh
+                            const blob = await res.blob();
+                            finalImgSrc = await new Promise((resolve) => {
+                                const reader = new FileReader();
+                                reader.onloadend = () => resolve(reader.result);
+                                reader.readAsDataURL(blob);
+                            });
+                        }
+
+                        removeMessage(loadingId);
+
+                        const imgMarkdown = `Hasil gambar untuk **"${text}"**:\n\n![${text}](${finalImgSrc})`;
+                        addMessageToCurrentSession('ai', imgMarkdown);
+                        renderMessageUI('ai', imgMarkdown, false);
+                    }
+
                 } else {
-                    conversationHistory = "User: " + text;
-                }
+                    // MODE CHAT BIASA / CANVAS / PEMBELAJARAN TERPANDU
+                    let promptText = text;
+                    if (selectedTool === 'canvas') {
+                        promptText = `[Mode Canvas: Buatkan kode, tulisan terstruktur, atau kerangka slide lengkap untuk permintaan ini] ${text}`;
+                    } else if (selectedTool === 'guide') {
+                        promptText = `[Mode Pembelajaran Terpandu: Jelaskan dan bimbing secara bertahap langkah demi langkah] ${text}`;
+                    }
 
-                let response;
-                let data;
-
-               if (currentModel === 'llama-4-scout') {
-                     const llamaPayload = `${API_PROMPT}\n\nBerikut adalah riwayat percakapan sebelumnya. Jawab pesan terakhir dari User secara nyambung dan natural (jangan tulis awalan "AI:"):\n${conversationHistory}\nAI:`;
-                     const llamaUrl = `${API_LLAMA_URL}?text=${encodeURIComponent(llamaPayload)}`;
-                     response = await fetch(llamaUrl);
-                     data = await response.json();
-
+                    const session = sessions.find(s => s.id === currentSessionId);
+                    let conversationHistory = "";
                     
-                    removeMessage(loadingId);
-
-                    if (data && data.success && data.response) {
-                        const replyText = data.response;
-                        addMessageToCurrentSession('ai', replyText);
-                        renderMessageUI('ai', replyText, true);
+                    if (session && session.messages.length > 0) {
+                        const recentMessages = session.messages.slice(-10); 
+                        conversationHistory = recentMessages.map(m => {
+                            return (m.sender === 'user' ? 'User: ' : 'AI: ') + m.content;
+                        }).join('\n');
                     } else {
-                        const errText = 'Maaf, terjadi kesalahan dari server Llama 4 Scout.';
-                        addMessageToCurrentSession('ai', errText);
-                        renderMessageUI('ai', errText, false);
+                        conversationHistory = "User: " + promptText;
                     }
-                } else {
-                    const fullPrompt = `${API_PROMPT}\n\nBerikut adalah riwayat percakapan sebelumnya. Gunakan konteks ini untuk menjawab pesan terakhir:\n${conversationHistory}`;
-                    const nexaiUrl = `${API_NEXAI_URL}?prompt=${encodeURIComponent(fullPrompt)}&text=${encodeURIComponent(text)}`;
-                    response = await fetch(nexaiUrl);
-                    data = await response.json();
 
-                    removeMessage(loadingId);
+                    let response;
+                    let data;
 
-                    if (data && data.data && data.data.reply) {
-                        const replyText = data.data.reply;
-                        addMessageToCurrentSession('ai', replyText);
-                        renderMessageUI('ai', replyText, true);
+                    if (currentModel === 'llama-4-scout') {
+                        const llamaPayload = `${API_PROMPT}\n\nBerikut adalah riwayat percakapan sebelumnya. Jawab pesan terakhir dari User secara nyambung dan natural (jangan tulis awalan "AI:"):\n${conversationHistory}\nAI:`;
+                        const llamaUrl = `${API_LLAMA_URL}?text=${encodeURIComponent(llamaPayload)}`;
+                        response = await fetch(llamaUrl);
+                        data = await response.json();
+
+                        removeMessage(loadingId);
+
+                        if (data && data.success && data.response) {
+                            addMessageToCurrentSession('ai', data.response);
+                            renderMessageUI('ai', data.response, true);
+                        } else {
+                            const errText = 'Maaf, terjadi kesalahan dari server Llama 4 Scout.';
+                            addMessageToCurrentSession('ai', errText);
+                            renderMessageUI('ai', errText, false);
+                        }
                     } else {
-                        const errText = 'Maaf, Server neXai Flash sedang dalam perbaikan.';
-                        addMessageToCurrentSession('ai', errText);
-                        renderMessageUI('ai', errText, false);
+                        const fullPrompt = `${API_PROMPT}\n\nBerikut adalah riwayat percakapan sebelumnya. Gunakan konteks ini untuk menjawab pesan terakhir:\n${conversationHistory}`;
+                        const nexaiUrl = `${API_NEXAI_URL}?prompt=${encodeURIComponent(fullPrompt)}&text=${encodeURIComponent(promptText)}`;
+                        response = await fetch(nexaiUrl);
+                        data = await response.json();
+
+                        removeMessage(loadingId);
+
+                        if (data && data.data && data.data.reply) {
+                            addMessageToCurrentSession('ai', data.data.reply);
+                            renderMessageUI('ai', data.data.reply, true);
+                        } else {
+                            const errText = 'Maaf, Server neXai Flash sedang dalam perbaikan.';
+                            addMessageToCurrentSession('ai', errText);
+                            renderMessageUI('ai', errText, false);
+                        }
                     }
                 }
-
             } catch (error) {
                 removeMessage(loadingId);
                 const netErr = 'Gagal terhubung ke server API.';
@@ -721,6 +884,44 @@
                 drawerOverlay.classList.add('hidden');
             }
         }
+
+        function toggleToolsModal() {
+            document.getElementById('tools-modal').classList.toggle('hidden');
+        }
+
+        function activateToolMode(mode) {
+            activeTool = mode;
+            const badge = document.getElementById('active-tool-badge');
+            const label = document.getElementById('active-tool-label');
+
+            badge.classList.remove('hidden');
+
+            if (mode === 'image') {
+                label.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles"></i><span>Buat gambar</span>`;
+                userInput.placeholder = "Deskripsikan gambar (cth: kucing astronot di bulan)...";
+            } else if (mode === 'canvas') {
+                label.innerHTML = `<i class="fa-solid fa-file-code"></i><span>Canvas</span>`;
+                userInput.placeholder = "Tulis topik kode, artikel, atau slide...";
+            } else if (mode === 'guide') {
+                label.innerHTML = `<i class="fa-solid fa-book-open"></i><span>Pembelajaran terpandu</span>`;
+                userInput.placeholder = "Apa yang ingin dipelajari langkah demi langkah?";
+            }
+
+            toggleToolsModal();
+            userInput.focus();
+        }
+
+        function resetToolMode() {
+            activeTool = null;
+            document.getElementById('active-tool-badge').classList.add('hidden');
+            userInput.placeholder = "Minta neXai";
+        }
+
+        function handleAttachmentClick(type) {
+            toggleToolsModal();
+            showInfoModal(type, `Fitur upload ${type} belum terhubung ke server.`);
+        }
+
 
         function toggleProfileModal() {
             updateUsageStats();
@@ -933,8 +1134,10 @@
                     typeWriter();
                 } else {
                     targetEl.innerHTML = marked.parse(content);
+                    enhanceGeneratedImages(targetEl);
                     scrollToBottom();
                 }
+
             }
         }
 
@@ -986,6 +1189,24 @@
             }
         }
 
+        window.onNativeImageReady = function(loadingId, promptText, finalImgSrc) {
+            removeMessage(loadingId);
+            const imgMarkdown = `Hasil gambar untuk **"${promptText}"**:\n\n![${promptText}](${finalImgSrc})`;
+            addMessageToCurrentSession('ai', imgMarkdown);
+            renderMessageUI('ai', imgMarkdown, false);
+            saveSessions();
+            renderDrawerList();
+            updateUsageStats();
+        };
+
+        window.onNativeImageError = function(loadingId, errText) {
+            removeMessage(loadingId);
+            addMessageToCurrentSession('ai', errText);
+            renderMessageUI('ai', errText, false);
+            saveSessions();
+        };
+
+
         function appendLoading() {
             const loadingId = 'loading-' + Date.now();
             const msgDiv = document.createElement('div');
@@ -1032,6 +1253,91 @@
                 }, 2000);
             });
         }
+
+        function enhanceGeneratedImages(container) {
+            const images = container.querySelectorAll('img');
+            images.forEach(img => {
+                // Klik gambar untuk buka halaman preview fullscreen
+                img.onclick = () => openImagePreview(img.src, img.alt);
+
+                // Buat tombol Unduh Gambar resmi di bawah gambar
+                const btnWrapper = document.createElement('div');
+                btnWrapper.className = 'mt-2.5';
+                btnWrapper.innerHTML = `
+                    <button type="button" class="inline-flex items-center space-x-2 px-4 py-2 rounded-full bg-[#28292c] hover:bg-[#333538] active:scale-95 text-gray-200 text-xs font-medium border border-[#3a3b3e] transition">
+                        <i class="fa-solid fa-download text-blue-400"></i>
+                        <span>Unduh Gambar</span>
+                    </button>
+                `;
+                btnWrapper.querySelector('button').onclick = () => downloadImageFile(img.src, img.alt);
+                img.insertAdjacentElement('afterend', btnWrapper);
+            });
+        }
+
+        function openImagePreview(src, caption = "Pratinjau Gambar") {
+            const modal = document.getElementById('image-preview-modal');
+            const imgEl = document.getElementById('preview-image-el');
+            const titleEl = document.getElementById('preview-image-title');
+            const dlBtn = document.getElementById('preview-download-btn');
+
+            imgEl.src = src;
+            titleEl.innerText = caption || "Pratinjau Gambar";
+            dlBtn.onclick = () => downloadImageFile(src, caption);
+            modal.classList.remove('hidden');
+        }
+
+        function closeImagePreview() {
+            document.getElementById('image-preview-modal').classList.add('hidden');
+        }
+
+        async function downloadImageFile(src, promptName = "nexai-image") {
+            const safeName = (promptName || "nexai-image")
+                .replace(/[^a-z0-9]/gi, '-')
+                .replace(/-+/g, '-')
+                .toLowerCase()
+                .substring(0, 30);
+            const filename = `${safeName || 'nexai-image'}-${Date.now()}.png`;
+
+            // Jika dibuka di dalam aplikasi Android (Sketchware), simpan langsung ke Galeri
+            if (window.AndroidHost && window.AndroidHost.saveBase64Image) {
+                try {
+                    if (src.startsWith('data:image')) {
+                        window.AndroidHost.saveBase64Image(src, filename);
+                        return;
+                    }
+                    const response = await fetch(src);
+                    const blob = await response.blob();
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                        window.AndroidHost.saveBase64Image(reader.result, filename);
+                    };
+                    reader.readAsDataURL(blob);
+                    return;
+                } catch (e) {
+                    console.error(e);
+                }
+            }
+
+            // Fallback untuk browser biasa
+            try {
+                const response = await fetch(src);
+                const blob = await response.blob();
+                const blobUrl = URL.createObjectURL(blob);
+
+                const link = document.createElement('a');
+                link.href = blobUrl;
+                link.download = filename;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
+            } catch (err) {
+                window.open(src, '_blank');
+            }
+        }
+
+
 
         function escapeHtml(text) {
             return text
