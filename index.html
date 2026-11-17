@@ -90,6 +90,11 @@
         #chat-box img:hover {
             opacity: 0.92;
         }
+        .gemini-input-box {
+            background-color: #1e1f22;
+            border-radius: 28px;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
 
     </style>
 </head>
@@ -336,7 +341,7 @@
 
     <!-- Chat Messages Container -->
     <main id="chat-box" class="flex-1 min-h-0 overflow-y-auto py-6 px-4 md:px-0 max-w-2xl w-full mx-auto space-y-6">
-        <div id="welcome-screen" class="h-full flex flex-col items-center justify-center text-center p-6 min-h-[50vh]">
+        <div id="welcome-screen" class="flex flex-col items-center text-center px-6 pt-28 pb-10">
             <div class="w-12 h-12 rounded-full bg-[#1e1f22] flex items-center justify-center mb-4">
                 <i class="fa-solid fa-sparkles text-xl text-blue-400"></i>
             </div>
@@ -350,7 +355,8 @@
         <div class="max-w-2xl mx-auto">
             <form id="chat-form" onsubmit="handleFormSubmit(event)" class="gemini-input-box p-2.5 flex flex-col border border-[#2d2f34]">
                 <!-- Badge indikator saat mode tool AI aktif -->
-                <div id="active-tool-badge" class="hidden px-2 pb-2 flex items-center justify-between">
+                <!-- Badge indikator saat mode tool AI aktif -->
+                <div id="active-tool-badge" class="hidden px-1.5 pt-0.5 pb-1.5 flex items-center justify-between">
                     <span id="active-tool-label" class="inline-flex items-center space-x-1.5 bg-[#282a2d] text-blue-400 text-xs font-medium px-3 py-1 rounded-full border border-blue-500/30">
                         <i class="fa-solid fa-wand-magic-sparkles"></i>
                         <span>Buat gambar</span>
@@ -360,24 +366,26 @@
                     </button>
                 </div>
 
-                <div class="flex items-end space-x-2 w-full">
-                    <button type="button" onclick="toggleToolsModal()" title="Tools AI" class="w-10 h-10 rounded-full flex items-center justify-center text-gray-300 hover:bg-[#2a2b2e] active:scale-95 transition flex-shrink-0">
+                <!-- Wrapper dinamis: Ramping berisi saat kosong, membesar 2 tingkat saat ada ketikan -->
+                <div id="input-wrapper" class="flex flex-nowrap items-center justify-between gap-2 w-full">
+                        <button type="button" id="tools-btn" onclick="toggleToolsModal()" title="Tools AI" class="order-1 w-10 h-10 rounded-full flex items-center justify-center text-gray-300 hover:bg-[#2a2b2e] active:scale-95 transition flex-shrink-0">
                         <i class="fa-solid fa-plus text-xl"></i>
                     </button>
 
                     <textarea 
                         id="user-input" 
-                      rows="1" 
+                        rows="1" 
                         placeholder="Minta neXai" 
-                        class="w-full bg-transparent text-gray-100 placeholder-gray-400 focus:outline-none resize-none max-h-32 text-sm py-2 px-1"
+                        class="order-2 flex-1 bg-transparent text-gray-100 placeholder-gray-400 focus:outline-none resize-none max-h-36 text-sm py-2 px-1 leading-relaxed whitespace-nowrap overflow-hidden"
                         onkeydown="checkEnterSubmit(event)"
                         oninput="autoResize(this)"></textarea>
 
-                    <button type="submit" id="send-btn" class="w-10 h-10 bg-[#2d2f34] text-gray-300 hover:text-white rounded-full flex items-center justify-center transition flex-shrink-0">
+                    <button type="submit" id="send-btn" class="order-3 w-10 h-10 bg-[#2d2f34] text-gray-400 rounded-full flex items-center justify-center transition flex-shrink-0">
                         <i id="send-icon" class="fa-solid fa-arrow-up text-lg"></i>
                     </button>
                 </div>
             </form>
+
             
             <p class="text-[11px] text-center text-gray-500 mt-2">
                 neXai adalah AI dan dapat melakukan kesalahan.
@@ -784,7 +792,7 @@
             renderMessageUI('user', text, false);
 
             userInput.value = '';
-            userInput.style.height = 'auto';
+            autoResize(userInput);
             resetToolMode();
 
             const loadingId = appendLoading();
@@ -925,18 +933,20 @@
 
             if (mode === 'image') {
                 label.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles"></i><span>Buat gambar</span>`;
-                userInput.placeholder = "Deskripsikan gambar (cth: kucing astronot di bulan)...";
+                userInput.placeholder = "Deskripsikan gambar...";
             } else if (mode === 'canvas') {
                 label.innerHTML = `<i class="fa-solid fa-file-code"></i><span>Canvas</span>`;
-                userInput.placeholder = "Tulis topik kode, artikel, atau slide...";
+                userInput.placeholder = "Topik kode, tulisan, atau slide...";
             } else if (mode === 'guide') {
                 label.innerHTML = `<i class="fa-solid fa-book-open"></i><span>Pembelajaran terpandu</span>`;
-                userInput.placeholder = "Apa yang ingin dipelajari langkah demi langkah?";
+                userInput.placeholder = "Apa yang ingin dipelajari...";
             }
 
             toggleToolsModal();
+            autoResize(userInput);
             userInput.focus();
         }
+
 
         function resetToolMode() {
             activeTool = null;
@@ -1012,9 +1022,6 @@
                 try {
                     sessions = JSON.parse(saved);
                     renderDrawerList();
-                    if (sessions.length > 0) {
-                        switchSession(sessions[0].id);
-                    }
                 } catch (e) {
                     sessions = [];
                 }
@@ -1180,6 +1187,7 @@
             }
         }
 
+
         function retryMessage(msgId) {
             const lastSession = sessions.find(s => s.id === currentSessionId);
             if (lastSession && lastSession.messages.length > 0) {
@@ -1229,10 +1237,46 @@
             if (el) el.remove();
         }
 
-        function autoResize(element) {
+         function autoResize(element) {
+            const chatForm = document.getElementById('chat-form');
+            const inputWrapper = document.getElementById('input-wrapper');
+            const toolsBtn = document.getElementById('tools-btn');
+            const sendBtn = document.getElementById('send-btn');
+
+            const hasText = element.value.length > 0;
+            const isNearBottom = (chatBox.scrollHeight - chatBox.scrollTop - chatBox.clientHeight) < 80;
+
+            if (hasText) {
+                // MODE MEMBESAR (saat mengetik minimal 1 huruf)
+                chatForm.classList.remove('p-2.5');
+                chatForm.classList.add('p-3.5');
+
+                inputWrapper.className = 'flex flex-wrap items-center justify-between gap-y-2.5 w-full';
+                element.className = 'order-1 w-full basis-full bg-transparent text-gray-100 placeholder-gray-400 focus:outline-none resize-none max-h-36 text-sm px-1.5 pt-0.5 pb-1 leading-relaxed';
+                toolsBtn.className = 'order-2 w-10 h-10 rounded-full flex items-center justify-center text-gray-300 hover:bg-[#2a2b2e] active:scale-95 transition flex-shrink-0';
+                sendBtn.className = 'order-3 w-10 h-10 bg-white text-black hover:bg-gray-200 rounded-full flex items-center justify-center transition flex-shrink-0 shadow-sm';
+            } else {
+                // MODE RAMPING BERISI (saat kosong atau pakai tools sebelum mengetik)
+                chatForm.classList.remove('p-3.5');
+                chatForm.classList.add('p-2.5');
+
+                inputWrapper.className = 'flex flex-nowrap items-center justify-between gap-2 w-full';
+                element.className = 'order-2 flex-1 bg-transparent text-gray-100 placeholder-gray-400 focus:outline-none resize-none max-h-36 text-sm py-2 px-1 leading-relaxed whitespace-nowrap';
+                toolsBtn.className = 'order-1 w-10 h-10 rounded-full flex items-center justify-center text-gray-300 hover:bg-[#2a2b2e] active:scale-95 transition flex-shrink-0';
+                sendBtn.className = 'order-3 w-10 h-10 bg-[#2d2f34] text-gray-400 rounded-full flex items-center justify-center transition flex-shrink-0';
+            }
+
             element.style.height = 'auto';
-            element.style.height = element.scrollHeight + 'px';
+            const nextHeight = hasText ? Math.max(element.scrollHeight, 44) : element.scrollHeight;
+            element.style.height = nextHeight + 'px';
+
+            element.style.overflowY = element.scrollHeight > 144 ? 'auto' : 'hidden';
+
+            if (isNearBottom) {
+                scrollToBottom();
+            }
         }
+
 
         function checkEnterSubmit(event) {
             if (event.key === 'Enter' && !event.shiftKey) {
@@ -1340,6 +1384,7 @@
         }
 
         let currentArtifactData = { code: '', filename: 'file.txt', mime: 'text/plain', isWeb: false };
+
 
         function detectCodeFileInfo(langClass, rawCode) {
             const lang = (langClass || '').replace('language-', '').toLowerCase().trim();
